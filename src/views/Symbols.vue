@@ -27,7 +27,7 @@
               <div class="column is-6">
                 <label>
                   <span>Search</span>
-                  <input type="search" class="">
+                  <input v-model="search" type="search">
                 </label>
               </div>
             </div>
@@ -36,17 +36,18 @@
 
                <thead>
                 <tr class="columns">
-                  <th class="column is-6">Company Name<span class="icon" aria-hidden="true"><em class="fas fa-sort"></em>
+                  <th @click="sort('companyName')" class="column is-4">Company Name<span class="icon" aria-hidden="true"><em class="fas fa-sort"></em>
                   </span></th>
-                  <th class="column is-2">Symbol<span class="icon" aria-hidden="true"><em class="fas fa-sort"></em></span></th>
-                  <th class="column is-2">Open<span class="icon" aria-hidden="true"><em class="fas fa-sort"></em></span></th>
-                  <th class="column is-2">Close<span class="icon" aria-hidden="true"><em class="fas fa-sort"></em></span></th>
+                  <th @click="sort('primaryExchange')" class="column is-2">Primary Exchange<span class="icon" aria-hidden="true"><em class="fas fa-sort"></em></span></th>
+                  <th @click="sort('symbol')" class="column is-2">Symbol<span class="icon" aria-hidden="true"><em class="fas fa-sort"></em></span></th>
+                  <th @click="sort('open')" class="column is-2">Open<span class="icon" aria-hidden="true"><em class="fas fa-sort"></em></span></th>
+                  <th @click="sort('close')" class="column is-2">Close<span class="icon" aria-hidden="true"><em class="fas fa-sort"></em></span></th>
                 </tr>
                </thead>
 
                <tbody>
                 <tr
-                  v-for="company in companies"
+                  v-for="company in sortedCompanies"
                   :key="company.symbol"
                   class="columns"
                 >
@@ -55,7 +56,8 @@
                     <div>Close <money :value="company.close"></money></div>
                     <timestamp :value="company.openTime"></timestamp> - <timestamp :value="company.closeTime"></timestamp> -->
                     
-                      <td class="column is-6"><a v-bind:href="url" v-bind:title="props">{{company.companyName}}</a></td>
+                      <td class="column is-4"><a v-bind:href="url" v-bind:title="props">{{company.companyName}}</a></td>
+                      <td class="column is-2">{{company.primaryExchange}}</td>
                       <td class="column is-2">{{company.symbol}}</td>
                       <td class="column is-2">{{company.open}}</td>
                       <td class="column is-2">{{company.close}}</td>
@@ -89,6 +91,7 @@
               </div>
             </div>
 
+            debug: sort={{currentSort}}, dir={{currentSortDir}}, page={{currentPage}}
           </div>
       </div>
 
@@ -104,37 +107,51 @@ export default {
             url: '#',
             loading : true,
             props: ['title'],
-            companies : [
-              {
-                label: 'Company Name',
-                field: 'company name',
-                sort: 'asc'
-              },
-              {
-                label: 'Symbol',
-                field: 'symbol',
-                sort: 'asc'
-              },
-              {
-                label: 'Open',
-                field: 'open',
-                sort: 'asc'
-              },
-              {
-                label: 'Close',
-                field: 'close',
-                sort: 'asc'
-              }
-            ],
+            companies : [],
+            search: '',
+            filter:'comapnyName, symbol',
+            currentSort:'name',
+            currentSortDir:'asc',
+            pageSize:6,
+            currentPage:1
+
         };
     },
     beforeMount () {
         API.getComputerHardwareCompanies().then(response => {
             this.companies = response.data;
+
+            console.log(this.companies)
         }).finally(() => {
             this.loading = false;
         });
     },
+    methods:{
+      sort:function(s) {
+        //if s == current sort, reverse
+        if(s === this.currentSort) {
+          this.currentSortDir = this.currentSortDir==='asc'?'desc':'asc';
+        }
+        this.currentSort = s;
+      }
+    },
+    computed:{
+      sortedCompanies:function() {
+        return this.companies.sort((a,b) => {
+          let modifier = 1;
+          if(this.currentSortDir === 'desc') modifier = -1;
+          if(a[this.currentSort] < b[this.currentSort]) return -1 * modifier;
+          if(a[this.currentSort] > b[this.currentSort]) return 1 * modifier;
+          return 0;
+        });
+      }
+
+      // filteredCompanies:function() {
+      //   var self=this;
+      //   return this.compaines.filter(function(company){return company.name.toLowerCase().indexOf(self.search.toLowerCase())>=0;});
+      // }
+
+    }
 }
 </script>
 
