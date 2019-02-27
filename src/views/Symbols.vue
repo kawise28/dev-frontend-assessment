@@ -16,7 +16,7 @@
                 
                 <label>
                   <span>Show</span>
-                  <select>
+                  <select v-model="pageSize">
                     <option value="10">10</option>
                     <option value="20">20</option>
                     <option value="All">All</option>
@@ -27,7 +27,7 @@
               <div class="column is-6">
                 <label>
                   <span>Search</span>
-                  <input v-model="search" type="search">
+                  <input v-model="searchTerm" type="search">
                 </label>
               </div>
             </div>
@@ -56,7 +56,7 @@
                     <div>Close <money :value="company.close"></money></div>
                     <timestamp :value="company.openTime"></timestamp> - <timestamp :value="company.closeTime"></timestamp> -->
                     
-                      <td class="column is-4"><a v-bind:href="url" v-bind:title="props">{{company.companyName}}</a></td>
+                      <td class="column is-4"><a :href="'/detail/' + company.symbol" v-bind:title="props">{{company.companyName}}</a></td>
                       <td class="column is-2">{{company.primaryExchange}}</td>
                       <td class="column is-2">{{company.symbol}}</td>
                       <td class="column is-2">{{company.open}}</td>
@@ -72,7 +72,7 @@
               <div class="column is-6">
                 
                 <div class="showing-container">
-                  <p>Showing 1 - 10</p>
+                  <p>Showing 1 - {{pageSize}}</p>
                 </div>
               </div>
 
@@ -104,17 +104,14 @@ export default {
     name : "Symbols",
     data () {
         return {
-            url: '#',
             loading : true,
-            props: ['title'],
             companies : [],
-            search: '',
+            searchTerm: '',
             filter:'comapnyName, symbol',
             currentSort:'name',
             currentSortDir:'asc',
-            pageSize:6,
+            pageSize:"10",
             currentPage:1
-
         };
     },
     beforeMount () {
@@ -133,24 +130,33 @@ export default {
           this.currentSortDir = this.currentSortDir==='asc'?'desc':'asc';
         }
         this.currentSort = s;
-      }
+      },
     },
     computed:{
       sortedCompanies:function() {
-        return this.companies.sort((a,b) => {
+        var sortedList = this.companies;      
+        var self = this;
+
+        if(this.searchTerm != '')
+        {
+          sortedList = this.companies.filter(function(company){return company.companyName.toLowerCase().indexOf(self.searchTerm.toLowerCase())>=0;});
+        }
+
+        if(self.pageSize != "All")
+        {
+          var pSize = parseInt(self.pageSize);
+          sortedList = sortedList.slice(0, pSize);
+        }
+        sortedList = sortedList.sort((a,b) => {
           let modifier = 1;
           if(this.currentSortDir === 'desc') modifier = -1;
           if(a[this.currentSort] < b[this.currentSort]) return -1 * modifier;
           if(a[this.currentSort] > b[this.currentSort]) return 1 * modifier;
           return 0;
         });
+
+        return sortedList;
       }
-
-      // filteredCompanies:function() {
-      //   var self=this;
-      //   return this.compaines.filter(function(company){return company.name.toLowerCase().indexOf(self.search.toLowerCase())>=0;});
-      // }
-
     }
 }
 </script>

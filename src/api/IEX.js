@@ -6,4 +6,8 @@ export default {
     getComputerHardwareCompanies () {
         return api.get('/stock/market/collection/tag?collectionName=Computer%20Hardware');
     },
+    getCompanyDetail (symbol) {
+        return api.get('/stock/' + symbol + '/company');
+    },
 }
+

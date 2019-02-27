@@ -1,6 +1,7 @@
 import Routes from './Constants';
 import HomeView from '../views/Home'
 import SymbolsView from '../views/Symbols'
+import DetailView from '../views/Detail'
 export default [
     {
         path : '/',
@@ -16,6 +17,14 @@ export default [
         component : SymbolsView,
         meta : {
             title : 'Symbols'
+        },
+    },
+    {
+        path : '/detail/:symbol',
+        name : Routes.DETAIL,
+        component : DetailView,
+        meta : {
+            title : 'Company Details'
         },
     },
 ];
