@@ -91,7 +91,7 @@
               </div>
             </div>
 
-            debug: sort={{currentSort}}, dir={{currentSortDir}}, page={{currentPage}}
+            
           </div>
       </div>
 
